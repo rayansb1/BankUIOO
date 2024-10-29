@@ -1,86 +1,152 @@
 import 'package:bankui/model/bank.dart';
-import 'package:flutter/material.dart';
 import 'package:bankui/model/customer.dart';
+import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  // Initialize the Bank and add Customer instances inside main
+  Bank raybank = Bank();
+  Customer c1 = Customer("Rayan", "A1211", 99999999999.99);
+  raybank.addCustomer(c1);
+
+  runApp(MyApp(bank: raybank)); // Pass the bank instance to MyApp
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Bank bank;
+
+  const MyApp({super.key, required this.bank});
 
   @override
   Widget build(BuildContext context) {
-    Bank b1 = Bank();
-
-    // Creating customer instances
-    Customer c1 = Customer("Rayan", "A12312", 9999999999.99);
-    Customer c2 = Customer("Rakan", "A12313", 9999999999.99);
-    Customer c3 = Customer("Mohammed", "A12314", 9999999999.99);
-    Customer c4 = Customer("Khalid", "A12315", 9999999999.99);
-    Customer c5 = Customer("Suliman", "A12316", 9999999999.99);
-
-    // Adding customers to the bank
-    b1.addCustomer(c1);
-    b1.addCustomer(c2);
-    b1.addCustomer(c3);
-    b1.addCustomer(c4);
-    b1.addCustomer(c5);
-
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Ray Bank",
-            style: TextStyle(fontSize: 23),
-          ),
-          titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-          backgroundColor: const Color.fromARGB(255, 0, 68, 97),
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 50), // Adjust spacing as needed
-              ...b1.customers.map((customer) {
-                // Create a list of widgets for each customer
-                String balanceString = customer.getBalance.toString();
+      home: LoginPage(bank: bank),
+    );
+  }
+}
 
-                final gradientColors = [
-                  Colors.blueAccent,
-                  Colors.lightBlueAccent,
-                ];
+class LoginPage extends StatelessWidget {
+  final Bank bank;
+  final nameController = TextEditingController();
+  final accountIdController = TextEditingController();
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: gradientColors,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(10), // Rounded corners
-                    ),
-                    padding: const EdgeInsets.all(15),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Hello ${customer.getName}",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text("Your Account Number is ${customer.getAccountId}",
-                            style: const TextStyle(color: Colors.white)),
-                        Text("Your Balance is: $balanceString SR",
-                            style: const TextStyle(color: Colors.white)),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ],
-          ),
+  LoginPage({super.key, required this.bank});
+
+  void _login(BuildContext context) {
+    // Check if there’s a customer in the bank with the entered name and account ID
+    bool isCustomerValid = bank.customers.any((c1) =>
+        c1.Name == nameController.text &&
+        c1.AccountID == accountIdController.text);
+
+    if (isCustomerValid) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SuccessPage(),
         ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid name or account ID")),
+      );
+    }
+  }
+
+  void _signUp(BuildContext context) {
+    // Implement sign-up functionality here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Sign-up functionality not implemented")),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Ray Bank",
+            style: TextStyle(fontSize: 23, color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 0, 68, 97),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Welcome to our app", style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: "Enter your name",
+                labelStyle: const TextStyle(
+                    color: Color.fromARGB(
+                        255, 64, 64, 64)), // Dark blue label color
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Colors.blue[800]!,
+                      width: 2), // Border color when enabled
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      width: 2), // Border color when focused
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: accountIdController,
+              decoration: InputDecoration(
+                labelText: "Enter your Account ID",
+                labelStyle: const TextStyle(
+                    color: Color.fromARGB(
+                        255, 64, 64, 64)), // Dark blue label color
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Colors.blue[800]!,
+                      width: 2), // Border color when enabled
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      width: 2), // Border color when focused
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _login(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color.fromRGBO(12, 153, 209, 1), // button color
+                foregroundColor: Colors.white, // text color
+              ),
+              child: const Text("Log in", style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => _signUp(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color.fromARGB(255, 8, 54, 103), // button color
+                foregroundColor: Colors.white, // text color
+              ),
+              child: const Text("Sign up", style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SuccessPage extends StatelessWidget {
+  const SuccessPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Login Successful")),
+      body: const Center(
+        child: Text("Welcome!", style: TextStyle(fontSize: 24)),
       ),
     );
   }
